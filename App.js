@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, Easing} from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, StatusBar } from 'react-native';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { NavigationContainer } from '@react-navigation/native';
@@ -26,8 +26,8 @@ import PolicyScreen from './screens/PolicyScreen';
 import PaymentGatewayScreen from './screens/PaymentGatewayScreen';
 import OrderPlacedScreen from './screens/OrderPlacedScreen';
 import { useDispatch } from 'react-redux';
-import { fetchProducts } from './redux/slice/productSlice';
-
+import { fetchProduct } from './redux/slice/productSlice';
+import OrderCancellationScreen from './screens/OrderCancellationScreen';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -35,11 +35,12 @@ const Drawer = createDrawerNavigator();
 const WelcomeScreen = ({ onReady }) => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([
         new Promise((resolve) => setTimeout(resolve)), // Simulated delay
-        dispatch(fetchProducts()) // Fetch products
+        dispatch(fetchProduct()) // Fetch products
       ]);
 
       setLoading(false);
@@ -61,7 +62,6 @@ const WelcomeScreen = ({ onReady }) => {
   );
 };
 
-
 const AppStack = () => {
   return (
     <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
@@ -73,43 +73,39 @@ const AppStack = () => {
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Category" component={CategoryScreenWithFooter} />
       <Stack.Screen name="Account" component={AccountScreenWithFooter} />
-      <Stack.Screen name="Brands" component={BrandScreen} />
+      <Stack.Screen name="Brands" component={BrandScreenWithFooter} />
       <Stack.Screen name="Notifications" component={NotificationsScreenWithFooter} />
       <Stack.Screen name="OrderReceivedScreen" component={OrderReceivedScreen} />
       <Stack.Screen name="OrderHistoryScreen" component={OrderHistoryScreen} />
       <Stack.Screen name="Products" component={ProductsScreenWithFooter} />
       <Stack.Screen name="PaymentGatewayScreen" component={PaymentGatewayScreen} />
-      <Stack.Screen name = "OrderPlacedScreen" component={OrderPlacedScreen}/>
+      <Stack.Screen name="OrderPlacedScreen" component={OrderPlacedScreen} />
+      <Stack.Screen name="OrderCancellationScreen" component={OrderCancellationScreen} />
     </Stack.Navigator>
   );
 };
 
 const isCartEnabled = false;
 const AppDrawer = () => (
-
-
-
   <Drawer.Navigator
-  screenOptions={{
-    drawerType: 'front',
-    headerShown: false,
-    swipeEdgeWidth: 50,
-    drawerStyle: {
-      width: '50%',
-      backgroundColor: '#ffffff',
-    },
-    animation: 'slide',
-  }}
->
-  <Drawer.Screen name="home" component={AppStack} />
-  {isCartEnabled && <Drawer.Screen name="cart" component={CartScreen} />}
-  <Drawer.Screen name="Orders" component={OrderHistoryScreen} />
-  <Drawer.Screen name="About" component={AboutScreen} />
-  <Drawer.Screen name="Contact" component={ContactUsScreen} />
-  <Drawer.Screen name="Terms" component={PolicyScreen} />
-</Drawer.Navigator>
-
-  
+    screenOptions={{
+      drawerType: 'front',
+      headerShown: false,
+      swipeEdgeWidth: 50,
+      drawerStyle: {
+        width: '50%',
+        backgroundColor: '#ffffff',
+      },
+      animation: 'slide',
+    }}
+  >
+    <Drawer.Screen name="home" component={AppStack} />
+    {isCartEnabled && <Drawer.Screen name="cart" component={CartScreen} />}
+    <Drawer.Screen name="Orders" component={OrderHistoryScreen} />
+    <Drawer.Screen name="About" component={AboutScreen} />
+    <Drawer.Screen name="Contact" component={ContactUsScreen} />
+    <Drawer.Screen name="Terms" component={PolicyScreen} />
+  </Drawer.Navigator>
 );
 
 const App = () => {
@@ -120,6 +116,8 @@ const App = () => {
   return (
     <Provider store={store}>
       <NavigationContainer>
+        {/* ✅ Ensure Status Bar is Displayed */}
+        <StatusBar translucent={false} style="dark" backgroundColor="#ffffff" />
         <SafeAreaView style={styles.container}>
           {showWelcome ? (
             <WelcomeScreen onReady={handleReady} />
@@ -179,12 +177,19 @@ const CartScreenWithFooter = () => (
   </>
 );
 
+const BrandScreenWithFooter = () => (
+  <>
+    <BrandScreen />
+    <Footer />
+  </>
+);
+
 export default App;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  
+    backgroundColor: '#ffffff',
   },
   contentContainer: {
     flex: 1,

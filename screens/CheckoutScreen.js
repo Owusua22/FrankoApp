@@ -31,7 +31,7 @@ const CheckoutScreen = ({ navigation }) => {
   const [recipientAddress, setRecipientAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [shippingDetails, setShippingDetails] = useState({ locationCharge: 0 });
-  const [isShippingModalVisible, setShippingModalVisible] = useState(false);
+  const [shippingModalVisible, setShippingModalVisible] = useState(false);
 
   
 
@@ -216,8 +216,8 @@ const calculateTotalAmount = () => {
 };
 
 // Callback function to reload shipping details
-const handleShippingDetailsUpdated = async (updatedDetails) => {
-  setShippingDetails(updatedDetails);
+const handleShippingDetailsSave = (address) => {
+  setRecipientAddress(address); // Update address immediately
 };
 
   // Conditionally add Cash on Delivery to available payment methods if locationCharge > 0
@@ -263,27 +263,27 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
               />
             </View>
             <Text style={styles.label}>Recipient Address</Text>
-<View style={styles.addressRow}>
-  <TextInput
-    style={[styles.inputField, { flex: 1 }]}
-    value={recipientAddress}
-    placeholder="Enter your address"
-    editable={false} // Ensure read-only to prevent manual input
-  />
-  <TouchableOpacity
-    style={styles.changeButton}
-    onPress={() => setShippingModalVisible(true)}
-  >
-    <Text style={styles.changeButtonText}>
-      {recipientAddress === "Add Address" ? "Add Address" : "Change Address" }
-    </Text>
-  </TouchableOpacity>
-</View>
+      <View style={styles.addressRow}>
+        <TextInput
+          style={[styles.inputField, { flex: 1 }]}
+          value={recipientAddress}
+          placeholder="Enter your address"
+          editable={false} // Ensure read-only to prevent manual input
+        />
+        <TouchableOpacity
+          style={styles.changeButton}
+          onPress={() => setShippingModalVisible(true)}
+        >
+          <Text style={styles.changeButtonText}>
+            {recipientAddress === "Add Address" ? "Add Address" : "Change Address"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
           </View>
     
 
-  <Text style={styles} >Order Note</Text>
+  <Text style={styles.label} >Order Note</Text>
         <TextInput
           style={styles.textInput}
           placeholder="Add a note for your order"
@@ -354,7 +354,7 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
     );
   })
 ) : (
-  <Text style={styles.emptyCartMessage}>Your cart is empty.</Text>
+  <Text style={styles.emptyCartMessage}>No order found.</Text>
 )}
 
 
@@ -375,10 +375,12 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
       </ScrollView>
 
       <ShippingComponent
-        isVisible={isShippingModalVisible}
-        onClose={() => setShippingModalVisible(false)}
-        onShippingDetailsUpdated={handleShippingDetailsUpdated} // Pass callback
-      />
+  isVisible={shippingModalVisible}
+  onClose={() => setShippingModalVisible(false)}
+  onShippingDetailsSave={handleShippingDetailsSave} // Pass the callback
+/>
+
+
     </View>
   );
 };
@@ -446,7 +448,7 @@ const styles = StyleSheet.create({
     marginRight: 10, // Add space between input and button
   },
   changeButton: {
-    backgroundColor: "#AD2831",
+    backgroundColor: "#e63946",
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,
@@ -479,8 +481,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 5,
     fontWeight: "bold",
+    marginLeft: 20 
+
   },
-  summaryTotal: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#e63946" },
+  summaryTotal: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#e63946"},
   submitButton: {
     flexDirection: "row",
     alignItems: "center",

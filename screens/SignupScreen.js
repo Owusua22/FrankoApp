@@ -21,7 +21,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const SignupScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const message = useSelector((state) => state.customer.message); // Replace 'customer' with the actual slice name
+  const message = useSelector((state) => state.customer.message);
   const [formData, setFormData] = useState({
     customerAccountNumber: '',
     firstName: '',
@@ -34,7 +34,7 @@ const SignupScreen = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const accountNumber = UUID.v4(); // Generate a unique account number
+    const accountNumber = UUID.v4();
     setFormData((prevState) => ({
       ...prevState,
       customerAccountNumber: accountNumber,
@@ -67,7 +67,7 @@ const SignupScreen = () => {
       contactNumber,
       address,
       password,
-      accountType: 'customer', // Always customer
+      accountType: 'customer',
       customerAccountNumber,
       email: email || '',
     };
@@ -77,118 +77,112 @@ const SignupScreen = () => {
       await dispatch(createCustomer(finalData)).unwrap();
       console.log('Registration successful!');
       Alert.alert('Success', 'Registration successful!', [
-        { text: 'OK', onPress: () => navigation.navigate('Home') },
+        { text: 'OK', onPress: () => navigation.replace('Home') }, // Automatically navigate to Home screen
       ]);
     } catch (error) {
-      console.log('Registration failed:', error.message);
-      Alert.alert('Error', `Registration failed: ${error.message}`);
+   
+      Alert.alert("Registration failed.. Please try again");
     } finally {
-      console.log('Loading state set to false');
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjusts for platform
-  >
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      keyboardShouldPersistTaps="handled" // Allows taps outside the input to dismiss keyboard
-    >
-      <View style={styles.container}>
-        <Image source={require('../assets/frankoIcon.png')} style={styles.logo} />
-        <Text style={styles.title}>Register</Text>
-  
-        <View style={styles.inputContainer}>
-          <Icon name="person-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput
-            placeholder="First Name"
-            style={styles.input}
-            onChangeText={(value) => handleChange('firstName', value)}
-          />
-        </View>
-  
-        <View style={styles.inputContainer}>
-          <Icon name="person-circle-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput
-            placeholder="Last Name"
-            style={styles.input}
-            onChangeText={(value) => handleChange('lastName', value)}
-          />
-        </View>
-  
-        <View style={styles.inputContainer}>
-          <Icon name="call-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput
-            placeholder="Contact Number"
-            style={styles.input}
-            keyboardType="phone-pad"
-            onChangeText={(value) => handleChange('contactNumber', value)}
-          />
-        </View>
-  
-        <View style={styles.inputContainer}>
-          <Icon name="location-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput
-            placeholder="Address"
-            style={styles.input}
-            onChangeText={(value) => handleChange('address', value)}
-          />
-        </View>
-  
-        <View style={styles.inputContainer}>
-          <Icon name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput
-            placeholder="Password"
-            style={styles.input}
-            secureTextEntry
-            onChangeText={(value) => handleChange('password', value)}
-          />
-        </View>
-  
-        {loading ? (
-          <ActivityIndicator size="large" color="#007BFF" style={styles.loader} />
-        ) : (
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Register</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.container}>
+          <Image source={require('../assets/frankoIcon.png')} style={styles.logo} />
+          <Text style={styles.title}>Register</Text>
+
+          <View style={styles.inputContainer}>
+            <Icon name="person-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="First Name"
+              style={styles.input}
+              onChangeText={(value) => handleChange('firstName', value)}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="person-circle-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Last Name"
+              style={styles.input}
+              onChangeText={(value) => handleChange('lastName', value)}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="call-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Contact Number"
+              style={styles.input}
+              keyboardType="phone-pad"
+              onChangeText={(value) => handleChange('contactNumber', value)}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="location-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Address"
+              style={styles.input}
+              onChangeText={(value) => handleChange('address', value)}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Icon name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Password"
+              style={styles.input}
+              secureTextEntry
+              onChangeText={(value) => handleChange('password', value)}
+            />
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="large" color="#FF6347" style={styles.loader} />
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Register</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+            <Text style={styles.footerText}>
+              Already registered? <Text style={styles.linkText}>Login</Text>
+            </Text>
           </TouchableOpacity>
-        )}
-  
-        <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-          <Text style={styles.footerText}>
-            Already registered? <Text style={styles.linkText}>Login</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  </KeyboardAvoidingView>
-  
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 100, // Extra space for the keyboard
+    paddingBottom: 100,
   },
-  
+
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#F9F9F9',
+    padding: 20,
+    backgroundColor: '#F1F1F1',
   },
   logo: {
-    width: 140,
-    height: 80,
-    marginBottom: 10,
+    width: 160,
+    height: 90,
+    marginBottom: 20,
+    resizeMode: 'contain',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#006838',
     marginBottom: 20,
   },
   inputContainer: {
@@ -196,43 +190,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     backgroundColor: '#FFF',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginVertical: 10,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    marginVertical: 12,
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#E0E0E0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   icon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   input: {
     flex: 1,
     height: 50,
+    fontSize: 16,
+    color: '#333',
   },
   button: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#006838',
+    height: 55,
+    backgroundColor: '#FF6347',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 5,
+    marginVertical: 20,
   },
   buttonText: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   footerText: {
     fontSize: 14,
-    color: '#555',
+    color: '#888',
   },
   linkText: {
-    color: '#007BFF',
+    color: '#FF6347',
     fontWeight: 'bold',
   },
   loader: {
-    marginVertical: 10,
+    marginVertical: 20,
   },
 });
 

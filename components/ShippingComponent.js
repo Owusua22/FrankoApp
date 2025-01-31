@@ -9,27 +9,27 @@ import {
 } from "../redux/slice/shippingSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ShippingComponent = ({ isVisible, onClose }) => {
-    const dispatch = useDispatch();
-  
-    // Redux state
-    const { countries, divisions, locations, loading } = useSelector(
-      (state) => state.shipping
-    );
-  
-    // Local state
-    const [selectedCountry, setSelectedCountry] = useState("");
-    const [selectedDivision, setSelectedDivision] = useState("");
-    const [selectedLocation, setSelectedLocation] = useState("");
-  
-    useEffect(() => {
-      if (isVisible) {
-        dispatch(fetchShippingCountries());
-      }
-    }, [isVisible, dispatch]);
-  
-    // Save shipping details
-    const handleSaveShippingDetails = async () => {
+const ShippingComponent = ({ isVisible, onClose,onShippingDetailsSave }) => {
+  const dispatch = useDispatch();
+
+  // Redux state
+  const { countries, divisions, locations, loading } = useSelector(
+    (state) => state.shipping
+  );
+
+  // Local state
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedDivision, setSelectedDivision] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  useEffect(() => {
+    if (isVisible) {
+      dispatch(fetchShippingCountries());
+    }
+  }, [isVisible, dispatch]);
+
+  useEffect(() => {
+    const updateShippingDetails = async () => {
       try {
         const selectedLocationDetails = locations.find(
           (location) => location.locationCode === selectedLocation
@@ -37,123 +37,154 @@ const ShippingComponent = ({ isVisible, onClose }) => {
         const selectedDivisionDetails = divisions.find(
           (division) => division.divisionCode === selectedDivision
         );
-  
+
         const details = {
           country: selectedCountry,
           division: selectedDivisionDetails?.divisionName || "",
           location: selectedLocationDetails?.locationName || "",
           locationCharge: selectedLocationDetails?.shippingCharge || 0,
         };
-  
-        // Save to AsyncStorage
-        await AsyncStorage.setItem("shippingDetails", JSON.stringify(details));
-        Alert.alert("Success", "Shipping details saved successfully!");
-  
-        onClose(); // Close modal after saving
+
+        // Save to AsyncStorage on each change
+        if (selectedCountry || selectedDivision || selectedLocation) {
+          await AsyncStorage.setItem("shippingDetails", JSON.stringify(details));
+        }
       } catch (error) {
         console.error("Error saving shipping details:", error);
-        Alert.alert("Error", "Failed to save shipping details.");
       }
     };
+
+    updateShippingDetails();
+  }, [selectedCountry, selectedDivision, selectedLocation, divisions, locations]);
+
+  const handleSaveShippingDetails = async () => {
+    try {
+      const selectedLocationDetails = locations.find(
+        (location) => location.locationCode === selectedLocation
+      );
+      const selectedDivisionDetails = divisions.find(
+        (division) => division.divisionCode === selectedDivision
+      );
   
-    return (
-      <Modal visible={isVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Shipping Details</Text>
+      const details = {
+        country: selectedCountry,
+        division: selectedDivisionDetails?.divisionName || "",
+        location: selectedLocationDetails?.locationName || "",
+        locationCharge: selectedLocationDetails?.shippingCharge || 0,
+      };
   
-            {loading && <ActivityIndicator size="large" color="#3F6634" />}
+      // Save to AsyncStorage
+      await AsyncStorage.setItem("shippingDetails", JSON.stringify(details));
   
+      // Call the passed function to update the parent state
+      onShippingDetailsSave(details.location); // Pass updated address back to parent
+      Alert.alert("Success", "Shipping details saved successfully!");
+  
+      onClose(); // Close modal after saving
+    } catch (error) {
+      console.error("Error saving shipping details:", error);
+      Alert.alert("Error", "Failed to save shipping details.");
+    }
+  };
+  
+  return (
+    <Modal visible={isVisible} transparent animationType="slide">
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Shipping Details</Text>
+
+          {loading && <ActivityIndicator size="large" color="#3F6634" />}
+
+          <View style={styles.pickerContainer}>
+            <Text style={styles.label}>Select Country</Text>
+            <Picker
+              selectedValue={selectedCountry}
+              onValueChange={(value) => {
+                setSelectedCountry(value);
+                setSelectedDivision("");
+                setSelectedLocation("");
+                if (value) dispatch(fetchShippingDivisions(value));
+              }}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select a Country" value="" />
+              {countries.map((country) => (
+                <Picker.Item
+                  key={country.countryCode}
+                  label={country.countryName}
+                  value={country.countryCode}
+                />
+              ))}
+            </Picker>
+          </View>
+
+          {selectedCountry && (
             <View style={styles.pickerContainer}>
-              <Text style={styles.label}>Select Country</Text>
+              <Text style={styles.label}>Select Division</Text>
               <Picker
-                selectedValue={selectedCountry}
+                selectedValue={selectedDivision}
                 onValueChange={(value) => {
-                  setSelectedCountry(value);
-                  setSelectedDivision("");
+                  setSelectedDivision(value);
                   setSelectedLocation("");
-                  if (value) dispatch(fetchShippingDivisions(value));
+                  if (value) dispatch(fetchShippingLocations(value));
                 }}
                 style={styles.picker}
               >
-                <Picker.Item label="Select a Country" value="" />
-                {countries.map((country) => (
+                <Picker.Item label="Select a Division" value="" />
+                {divisions.map((division) => (
                   <Picker.Item
-                    key={country.countryCode}
-                    label={country.countryName}
-                    value={country.countryCode}
+                    key={division.divisionCode}
+                    label={division.divisionName}
+                    value={division.divisionCode}
                   />
                 ))}
               </Picker>
             </View>
-  
-            {selectedCountry && (
-              <View style={styles.pickerContainer}>
-                <Text style={styles.label}>Select Division</Text>
-                <Picker
-                  selectedValue={selectedDivision}
-                  onValueChange={(value) => {
-                    setSelectedDivision(value);
-                    setSelectedLocation("");
-                    if (value) dispatch(fetchShippingLocations(value));
-                  }}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select a Division" value="" />
-                  {divisions.map((division) => (
-                    <Picker.Item
-                      key={division.divisionCode}
-                      label={division.divisionName}
-                      value={division.divisionCode}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-  
-            {selectedDivision && (
-              <View style={styles.pickerContainer}>
-                <Text style={styles.label}>Select Town</Text>
-                <Picker
-                  selectedValue={selectedLocation}
-                  onValueChange={setSelectedLocation}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select a Location" value="" />
-                  {locations.map((location) => (
-                    <Picker.Item
-                      key={location.locationCode}
-                      label={`${location.locationName} - ${
-                        location.shippingCharge === 0
-                          ? "N/A"
-                          : `₵${location.shippingCharge}`
-                      }`}
-                      value={location.locationCode}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-  
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={handleSaveShippingDetails}
-            >
-              <Text style={styles.saveButtonText}>Save Shipping Details</Text>
-            </TouchableOpacity>
-  
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={onClose}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+          )}
+
+          {selectedDivision && (
+            <View style={styles.pickerContainer}>
+              <Text style={styles.label}>Select Town</Text>
+              <Picker
+                selectedValue={selectedLocation}
+                onValueChange={setSelectedLocation}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select a Location" value="" />
+                {locations.map((location) => (
+                  <Picker.Item
+                    key={location.locationCode}
+                    label={`${location.locationName} - ${
+                      location.shippingCharge === 0
+                        ? "N/A"
+                        : `₵${location.shippingCharge}`
+                    }`}
+                    value={location.locationCode}
+                  />
+                ))}
+              </Picker>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSaveShippingDetails}
+          >
+            <Text style={styles.saveButtonText}>Save Shipping Details</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+          >
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
-    );
-  };
-  
+      </View>
+    </Modal>
+  );
+};
+
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,

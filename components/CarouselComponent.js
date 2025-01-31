@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Dimensions, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Dimensions, StyleSheet, Image } from 'react-native';
 import Swiper from 'react-native-swiper';
 
 
@@ -7,9 +7,22 @@ const { width, height } = Dimensions.get('window');
 
 const CarouselComponent = () => {
   const carouselItems = [
-    { id: '1', image: require('../assets/newbanner.jpg'), title: 'shop now' },
-    { id: '2', image: require('../assets/sama16.jpg'), title: 'shop now' },
-    { id: '3', image: require('../assets/sam.jpg'), title: 'shop now' },
+    { id: '1', image: require('../assets/BANNER S25.jpg') },
+    { id: '2', image: require('../assets/samgg.jpg') },
+    { id: '3', image: require('../assets/samggg.jpg') },
+    { id: '4', image: require('../assets/s24.jpg') },
+    { id: '5', image: require('../assets/camon30.jpg') },
+    { id: '6', image: require('../assets/flip.jpg') },
+    { id: '7', image: require('../assets/fold6.jpg') },
+    { id: '8', image: require('../assets/fold256gb.jpg') },
+    { id: '9', image: require('../assets/galaxy.jpeg') },
+    { id: '10', image: require('../assets/itel.jpg') },
+    { id: '11', image: require('../assets/note40.jpg') },
+    { id: '12', image: require('../assets/smart9.jpg') },
+    { id: '13', image: require('../assets/spark30.jpg') },
+    { id: '14', image: require('../assets/vflip.jpg') },
+    { id: '15', image: require('../assets/Pop9.jpg') },
+
   ];
 
   const handleShopNow = (title) => {
@@ -17,23 +30,22 @@ const CarouselComponent = () => {
   };
   return (
     <View style={styles.container}>
-      <Swiper
-        style={styles.wrapper}
-        autoplay
-        autoplayTimeout={5}
-        loop
-        dotColor="#fff"
-        activeDotColor="#ff6347"
-        removeClippedSubviews={false} // Improves performance on Android
-      >
-        {carouselItems.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Image source={item.image} style={styles.image} />
-            
-           
-          </View>
-        ))}
-      </Swiper>
+    <Swiper
+  style={styles.wrapper}
+  autoplay
+  autoplayTimeout={5}
+  loop
+  dotColor="transparent" // Makes the dots invisible
+  activeDotColor="transparent" // Makes the active dot invisible
+  removeClippedSubviews={false} // Improves performance on Android
+>
+  {carouselItems.map((item) => (
+    <View key={item.id} style={styles.card}>
+      <Image source={item.image} style={styles.image} />
+    </View>
+  ))}
+</Swiper>
+
     </View>
   );
 };
